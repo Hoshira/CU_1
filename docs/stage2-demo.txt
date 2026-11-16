@@ -1,0 +1,39 @@
+Этап 2. Сбор данных о зависимостях (apt)
+=========================================
+
+=== Успешный запуск (remote, Pre-Depends) ===
+> python -m src.pkgviz --package coreutils --repo http://archive.ubuntu.com/ubuntu --mode remote --version 8.32-4.1ubuntu1
+Прямые зависимости пакета coreutils (8.32-4.1ubuntu1):
+  - libacl1
+  - libattr1
+  - libc6
+  - libgmp10
+  - libselinux1
+> echo %errorlevel%
+0
+
+=== Успешный запуск (remote, Depends) ===
+> python -m src.pkgviz --package bash --repo http://archive.ubuntu.com/ubuntu --mode remote --version 5.1-6ubuntu1
+Прямые зависимости пакета bash (5.1-6ubuntu1):
+  - base-files
+  - debianutils
+> echo %errorlevel%
+0
+
+=== Пакет не найден ===
+> python -m src.pkgviz --package bash --repo http://archive.ubuntu.com/ubuntu --mode remote --version 9.9.9
+[ERROR] Пакет bash версии 9.9.9 не найден в репозитории
+> echo %errorlevel%
+3
+
+=== Ошибка сети ===
+> python -m src.pkgviz --package bash --repo http://nonexistent.invalid --mode remote --version 5.1-6ubuntu1
+[ERROR] Не удалось загрузить ...
+> echo %errorlevel%
+3
+
+=== Локальный каталог без Packages ===
+> python -m src.pkgviz --package bash --repo . --mode local --version 5.1-6ubuntu1
+[ERROR] В каталоге . не найден файл Packages
+> echo %errorlevel%
+3

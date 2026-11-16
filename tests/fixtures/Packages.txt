@@ -1,0 +1,26 @@
+Package: bash
+Version: 5.1-6ubuntu1
+Depends: base-files (>= 2.1.12), debianutils (>= 2.15), libc6 (>= 2.34)
+Description: GNU Bourne Again SHell
+ A multiline description.
+
+Package: coreutils
+Version: 8.32-4.1ubuntu1
+Pre-Depends: libacl1 (>= 2.2.23), libattr1 (>= 1:2.4.44), libc6 (>= 2.34), libgmp10 (>= 2:6.2.1+dfsg), libselinux1 (>= 3.1~)
+Description: GNU core utilities
+
+Package: base-files
+Version: 12ubuntu4
+Description: Debian base system miscellaneous files
+
+Package: multiline-deps
+Version: 1.0
+Depends: base-files (>= 2.1.12),
+ debianutils (>= 2.15),
+ libc6 (>= 2.34)
+Description: Package with multiline Depends
+
+Package: combined
+Version: 1.0
+Pre-Depends: pre-pkg
+Depends: dep-a, dep-b

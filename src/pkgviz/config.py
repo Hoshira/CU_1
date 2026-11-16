@@ -23,6 +23,9 @@ class AppConfig:
     repo: str
     mode: str
     version: str
+    dist: str = "jammy"
+    component: str = "main"
+    arch: str = "amd64"
 
     def as_dict(self) -> Dict[str, str]:
         """Представление конфигурации в виде словаря ключ-значение."""
@@ -31,8 +34,10 @@ class AppConfig:
             "repo": self.repo,
             "mode": self.mode,
             "version": self.version,
+            "dist": self.dist,
+            "component": self.component,
+            "arch": self.arch,
         }
-
 
 def build_parser() -> argparse.ArgumentParser:
     """Создать парсер аргументов командной строки."""
@@ -55,6 +60,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Режим работы с репозиторием: local | remote",
     )
     parser.add_argument("-v", "--version", required=True, help="Версия пакета")
+    parser.add_argument(
+        "--dist", default="jammy", help="Кодовое имя дистрибутива Ubuntu"
+    )
+    parser.add_argument(
+        "--component", default="main", help="Компонент репозитория"
+    )
+    parser.add_argument(
+        "--arch", default="amd64", help="Архитектура пакетов"
+    )
     return parser
 
 
@@ -73,7 +87,8 @@ def _validate_repo(repo: str, mode: str) -> str:
     if mode == "local":
         if not os.path.isdir(repo):
             raise ConfigError(
-                f"Локальный репозиторий не найден или не является каталогом: {repo!r}."
+                "Локальный репозиторий не найден "
+                f"или не является каталогом: {repo!r}."
             )
         return repo
 
@@ -117,4 +132,12 @@ def parse_config(argv: Optional[List[str]] = None) -> AppConfig:
     repo = _validate_repo(args.repo, mode)
     version = _validate_version(args.version)
 
-    return AppConfig(package=package, repo=repo, mode=mode, version=version)
+    return AppConfig(
+        package=package,
+        repo=repo,
+        mode=mode,
+        version=version,
+        dist=args.dist,
+        component=args.component,
+        arch=args.arch,
+    )
