@@ -1,0 +1,47 @@
+=== Успешный запуск (local) ===
+> python -m src.pkgviz --package requests --repo test-repo --mode local --version 2.31.0
+Параметры запуска:
+  package: requests
+  repo: test-repo
+  mode: local
+  version: 2.31.0
+> echo %errorlevel%
+0
+
+=== Ошибка: имя пакета ===
+> python -m src.pkgviz --package "bad name!" --repo https://github.com/psf/requests --mode remote --version 2.31.0
+[ERROR] Некорректное имя пакета 'bad name!': разрешены только буквы, цифры, '.', '_' и '-' (1..128 символов).
+> echo %errorlevel%
+2
+
+=== Ошибка: URL репозитория ===
+>python -m src.pkgviz --package requests --repo ftp://example.com/repo --mode remote --version 2.31.0
+[ERROR] Некорректный URL репозитория 'ftp://example.com/repo': ожидается http(s)-адрес.
+>echo %errorlevel%
+2
+
+=== Ошибка: локальный путь ===
+>python -m src.pkgviz --package requests --repo no-such-dir --mode local --version 2.31.0
+[ERROR] Локальный репозиторий не найден или не является каталогом: 'no-such-dir'.
+>echo %errorlevel%
+2
+
+=== Ошибка: режим работы ===
+>python -m src.pkgviz --package requests --repo https://github.com/psf/requests --mode cloud --version 2.31.0
+usage: pkgviz [-h] -p PACKAGE -r REPO -m {local,remote} -v VERSION
+pkgviz: error: argument -m/--mode: invalid choice: 'cloud' (choose from 'local', 'remote')
+>echo %errorlevel%
+2
+
+=== Ошибка: версия пакета ===
+>python -m src.pkgviz --package requests --repo https://github.com/psf/requests --mode remote --version "1.0 beta"
+[ERROR] Некорректная версия '1.0 beta': разрешены буквы, цифры, '.', '_', '-', '+' (1..64 символа).
+>echo %errorlevel%
+2
+
+=== Ошибка: обязательный параметр ===
+>python -m src.pkgviz --package requests --repo https://github.com/psf/requests --mode remote
+usage: pkgviz [-h] -p PACKAGE -r REPO -m {local,remote} -v VERSION
+pkgviz: error: the following arguments are required: -v/--version
+>echo %errorlevel%
+2
