@@ -28,6 +28,7 @@ class AppConfig:
     arch: str = "amd64"
     test_repo: Optional[str] = None
     reverse: bool = False
+    d2: bool = False
 
     def as_dict(self) -> Dict[str, str]:
         """Представление конфигурации в виде словаря ключ-значение."""
@@ -78,6 +79,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--reverse", action="store_true",
         help="Вывести обратные зависимости (кто зависит от пакета)",
+    )
+    parser.add_argument(
+        "--d2", action="store_true",
+        help="Вывести граф в формате D2",
     )
     return parser
 
@@ -152,6 +157,7 @@ def parse_config(argv: Optional[List[str]] = None) -> AppConfig:
             arch=args.arch,
             test_repo=args.test_repo,
             reverse=args.reverse,
+            d2=args.d2,
         )
 
     repo = _validate_repo(args.repo, mode)
@@ -167,4 +173,5 @@ def parse_config(argv: Optional[List[str]] = None) -> AppConfig:
         arch=args.arch,
         test_repo=args.test_repo,
         reverse=args.reverse,
+        d2=args.d2,
     )

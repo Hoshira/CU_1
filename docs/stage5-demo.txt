@@ -1,0 +1,81 @@
+Этап 5. Визуализация графа зависимостей в D2
+=============================================
+
+Формат D2: текстовое описание графа, рёбра направлены
+от зависимого пакета к его зависимости.
+
+=== Пример 1: bash (2 прямые зависимости) ===
+> python -m src.pkgviz --package bash --repo http://archive.ubuntu.com/ubuntu --mode remote --version 5.1-6ubuntu1 --d2
+direction: down
+bash -> base-files
+bash -> debianutils
+> echo %errorlevel%
+0
+
+=== Пример 2: coreutils (5 зависимостей из Pre-Depends) ===
+> python -m src.pkgviz --package coreutils --repo http://archive.ubuntu.com/ubuntu --mode remote --version 8.32-4.1ubuntu1 --d2
+direction: down
+coreutils -> libacl1
+coreutils -> libattr1
+coreutils -> libc6
+coreutils -> libgmp10
+coreutils -> libselinux1
+> echo %errorlevel%
+0
+
+=== Пример 3: apt (полный транзитивный граф) ===
+> python -m src.pkgviz --package apt --repo http://archive.ubuntu.com/ubuntu --mode remote --version 2.4.5 --d2
+direction: down
+adduser -> debconf
+...
+zlib1g -> libc6
+> echo %errorlevel%
+0
+
+=== Обратные зависимости в D2 (тестовый репозиторий) ===
+> python -m src.pkgviz --package D --repo dummy --mode local --version 1.0 --test-repo tests/fixtures/test_graph_reverse.txt --reverse --d2
+direction: down
+B -> D
+C -> D
+> echo %errorlevel%
+0
+
+=== Пустой результат в D2 (нет обратных зависимостей) ===
+> python -m src.pkgviz --package A --repo dummy --mode local --version 1.0 --test-repo tests/fixtures/test_graph_reverse_none.txt --reverse --d2
+direction: down
+A
+> echo %errorlevel%
+0
+
+=== Пакет 3: apt (версия 2.4.5) ===
+
+Эталон из Packages.gz (эквивалент apt-cache depends):
+  Pre-Depends: (нет)
+  Depends: adduser, gpgv | gpgv2 | gpgv1, libapt-pkg6.0 (>= 2.4.5),
+           ubuntu-keyring, libc6 (>= 2.34), libgcc-s1 (>= 3.3.1),
+           libgnutls30 (>= 3.7.0), libseccomp2 (>= 2.4.2),
+           libstdc++6 (>= 11), libsystemd0
+  Прямых зависимостей: 10 (с учётом первой альтернативы для gpgv)
+
+Наш D2 (прямые):
+  apt -> adduser
+  apt -> gpgv
+  apt -> libapt-pkg6.0
+  apt -> libc6
+  apt -> libgcc-s1
+  apt -> libgnutls30
+  apt -> libseccomp2
+  apt -> "libstdc++6"
+  apt -> libsystemd0
+  apt -> ubuntu-keyring
+
+Совпадение: 10 из 10 по именам (gpgv — первая альтернатива).
+
+Расхождение: альтернатива gpgv | gpgv2 | gpgv1 — apt-cache depends
+показал бы все три пакета, наш граф — только первый (gpgv),
+потому что для графа нужна одна вершина на ребро.
+
+Дополнительно в выводе присутствуют транзитивные зависимости
+(debconf, perl-base, dpkg, tar и т.д.) — это следствие полного
+обхода build_graph_dfs. apt-cache depends без -r показывает
+только прямые; apt-rdepends показывает рекурсивно, как и мы.

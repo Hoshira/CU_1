@@ -80,3 +80,38 @@ def test_main_prints_reverse_dependencies(tmp_path, capsys):
     assert "A" in out
     assert "B" in out
     assert "C" in out
+
+
+def test_main_prints_d2_in_test_mode(capsys):
+    argv = [
+        "--package", "A",
+        "--repo", "dummy",
+        "--mode", "local",
+        "--version", "1.0",
+        "--test-repo", "tests/fixtures/test_graph_simple.txt",
+        "--d2",
+    ]
+    rc = main(argv)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "direction: down" in out
+    assert "A -> B" in out
+    assert "A -> C" in out
+
+
+def test_main_prints_reverse_d2(capsys):
+    argv = [
+        "--package", "D",
+        "--repo", "dummy",
+        "--mode", "local",
+        "--version", "1.0",
+        "--test-repo", "tests/fixtures/test_graph_reverse.txt",
+        "--reverse",
+        "--d2",
+    ]
+    rc = main(argv)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "direction: down" in out
+    assert "B -> D" in out
+    assert "C -> D" in out

@@ -79,3 +79,18 @@ def get_direct_dependencies(
     for field in ("Pre-Depends", "Depends"):
         deps.extend(extract_dependency_names(pkg.get(field, "")))
     return deps
+
+
+def find_any_version(
+    packages: List[Dict[str, str]],
+    name: str,
+) -> Optional[Dict[str, str]]:
+    """Найти любой пакет с заданным именем (версия не важна).
+
+    Нужно для построения графа: в графе узлы — имена, версии
+    отбрасываются, поэтому берём первую подходящую запись.
+    """
+    for pkg in packages:
+        if pkg.get("Package") == name:
+            return pkg
+    return None
