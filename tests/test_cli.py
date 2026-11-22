@@ -2,7 +2,7 @@
 
 import io
 from contextlib import redirect_stderr, redirect_stdout
-
+from pathlib import Path
 from src.pkgviz.cli import main
 from src.pkgviz.errors import ExitCode
 
@@ -61,3 +61,22 @@ def test_main_returns_data_error_when_package_missing(tmp_path, capsys):
     assert rc == 3
     assert "[ERROR]" in err
     assert "не найден" in err
+
+
+def test_main_prints_reverse_dependencies(tmp_path, capsys):
+    fixture = Path("tests/fixtures/test_graph_reverse.txt")
+    argv = [
+        "--package", "D",
+        "--repo", "dummy",
+        "--mode", "local",
+        "--version", "1.0",
+        "--test-repo", str(fixture),
+        "--reverse",
+    ]
+    rc = main(argv)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "Обратные зависимости для D" in out
+    assert "A" in out
+    assert "B" in out
+    assert "C" in out

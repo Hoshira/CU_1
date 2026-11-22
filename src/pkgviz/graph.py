@@ -3,6 +3,49 @@
 from typing import Callable, Dict, List, Set, Tuple
 
 
+def build_reverse_index(
+    graph: Dict[str, List[str]],
+) -> Dict[str, List[str]]:
+    """Построить обратный индекс: пакет -> кто от него зависит.
+
+    Для каждого ребра A -> B добавляем B -> A.
+    """
+    reverse: Dict[str, List[str]] = {}
+    for node, deps in graph.items():
+        reverse.setdefault(node, [])
+        for dep in deps:
+            reverse.setdefault(dep, [])
+            if node not in reverse[dep]:
+                reverse[dep].append(node)
+    return reverse
+
+
+def collect_reverse_dependencies(
+    graph: Dict[str, List[str]],
+    target: str,
+) -> List[str]:
+    """Собрать все пакеты, которые (транзитивно) зависят от target.
+
+    Использует итеративный DFS без рекурсии — тот же приём, что и
+    build_graph_dfs, но по обратному индексу.
+    """
+    reverse = build_reverse_index(graph)
+    visited: Set[str] = {target}
+    stack: List[str] = [target]
+    result: List[str] = []
+
+    while stack:
+        node = stack.pop()
+        for parent in reverse.get(node, []):
+            if parent in visited:
+                continue
+            visited.add(parent)
+            result.append(parent)
+            stack.append(parent)
+
+    return result
+
+
 def build_graph_dfs(
     root: str,
     get_deps: "Callable[[str], List[str]]",

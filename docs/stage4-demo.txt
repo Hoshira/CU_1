@@ -1,0 +1,34 @@
+Этап 4. Обратные зависимости (reverse dependencies)
+====================================================
+
+Алгоритм: итеративный DFS без рекурсии по обратному индексу графа.
+Сам целевой пакет в результат не включается, даже если достижим через цикл.
+
+=== Случай 1: несколько обратных зависимостей (транзитивно) ===
+Граф: A -> B, C; B -> D; C -> D; D -> (нет)
+
+> python -m src.pkgviz --package D --repo dummy --mode local --version 1.0 --test-repo tests/fixtures/test_graph_reverse.txt --reverse
+Обратные зависимости для D:
+  - A
+  - B
+  - C
+> echo %errorlevel%
+0
+
+=== Случай 2: обратных зависимостей нет ===
+Граф: A -> B; B -> (нет)
+
+> python -m src.pkgviz --package A --repo dummy --mode local --version 1.0 --test-repo tests/fixtures/test_graph_reverse_none.txt --reverse
+Обратных зависимостей для A нет.
+> echo %errorlevel%
+0
+
+=== Случай 3: цикл A -> B -> C -> A ===
+Обход не зацикливается; целевой пакет A не попадает в результат.
+
+> python -m src.pkgviz --package A --repo dummy --mode local --version 1.0 --test-repo tests/fixtures/test_graph_reverse_cycle.txt --reverse
+Обратные зависимости для A:
+  - B
+  - C
+> echo %errorlevel%
+0
