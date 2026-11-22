@@ -85,8 +85,7 @@ def find_cycles(
     color: Dict[str, int] = {node: WHITE for node in graph}
     cycles: List[List[str]] = []
 
-    # Стек: (узел, индекс следующей зависимости, путь от корня)
-    stack: List[tuple] = [(root, 0, [root])]
+    stack: List[Tuple[str, int, List[str]]] = [(root, 0, [root])]
     color[root] = GRAY
 
     while stack:
@@ -97,7 +96,6 @@ def find_cycles(
             stack[-1] = (node, idx + 1, path)
 
             if dep not in color:
-                # пакет вне обхода — раскрываем как новый
                 color[dep] = WHITE
                 graph.setdefault(dep, [])
 
@@ -105,7 +103,6 @@ def find_cycles(
                 color[dep] = GRAY
                 stack.append((dep, 0, path + [dep]))
             elif color[dep] == GRAY:
-                # нашли цикл: от dep до текущего узла
                 start = path.index(dep)
                 cycles.append(path[start:] + [dep])
         else:

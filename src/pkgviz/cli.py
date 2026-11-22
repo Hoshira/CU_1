@@ -115,7 +115,6 @@ def _resolve_test_graph(config: AppConfig) -> Dict[str, List[str]]:
     deps_map = parse_test_repo(config.test_repo)
 
     if config.reverse:
-        # Для обратных зависимостей нужен весь граф из файла
         if config.package not in deps_map:
             raise DataError(
                 f"Пакет {config.package} не описан "
@@ -123,8 +122,8 @@ def _resolve_test_graph(config: AppConfig) -> Dict[str, List[str]]:
             )
         return deps_map
 
-    # Для прямых зависимостей — обход от корня (как на этапе 3)
     def get_deps(name: str) -> List[str]:
+        """Вернуть зависимости пакета из тестового репозитория."""
         if name not in deps_map:
             raise DataError(
                 f"Пакет {name} не описан в тестовом репозитории"
