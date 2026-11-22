@@ -2,7 +2,7 @@
 
 import os
 import sys
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from .config import AppConfig, parse_config
 from .errors import ConfigError, DataError, ExitCode
@@ -69,13 +69,45 @@ def _print_dependencies(config: AppConfig, deps: List[str]) -> None:
         print(f"  - {name}")
 
 
+def _print_test_graph(graph: Dict[str, List[str]], root: str) -> None:
+    """Вывести граф в читаемом виде и циклы, если есть."""
+    from .graph import find_cycles
+
+    print(f"Граф зависимостей от {root}:")
+    for node in sorted(graph):
+        deps = ", ".join(graph[node]) if graph[node] else "(нет)"
+        print(f"  {node} -> {deps}")
+
+    cycles = find_cycles(graph, root)
+    if cycles:
+        print("Обнаружены циклы:")
+        for cycle in cycles:
+            print("  " + " -> ".join(cycle))
+    else:
+        print("Циклов не обнаружено.")
+
+
 def _print_error(message: str) -> None:
     """Вывести сообщение об ошибке в stderr."""
     print(f"[ERROR] {message}", file=sys.stderr)
 
 
+def _resolve_test_graph(config: AppConfig) -> Dict[str, List[str]]:
+    """Построить граф из файла тестового репозитория."""
+    from .test_repo_parser import parse_test_repo
+    from .graph import build_graph_dfs
+
+    deps_map = parse_test_repo(config.test_repo)
+
+    def get_deps(name: str) -> List[str]:
+        if name not in deps_map:
+            raise DataError(f"Пакет {name} не описан в тестовом репозитории")
+        return deps_map[name]
+
+    return build_graph_dfs(config.package, get_deps)
+
+
 def main(argv: Optional[List[str]] = None) -> int:
-    """Точка входа CLI: разбор параметров и вывод зависимостей."""
     try:
         config = parse_config(argv)
     except ConfigError as exc:
@@ -83,7 +115,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         return ExitCode.CONFIG_ERROR
 
     try:
-        deps = _resolve_dependencies(config)
+        if config.test_repo:
+            graph = _resolve_test_graph(config)
+            _print_test_graph(graph, config.package)
+        else:
+            deps = _resolve_dependencies(config)
+            _print_dependencies(config, deps)
     except DataError as exc:
         _print_error(str(exc))
         return ExitCode.DATA_ERROR
@@ -91,7 +128,6 @@ def main(argv: Optional[List[str]] = None) -> int:
         _print_error(str(exc))
         return ExitCode.DATA_ERROR
 
-    _print_dependencies(config, deps)
     return ExitCode.OK
 
 

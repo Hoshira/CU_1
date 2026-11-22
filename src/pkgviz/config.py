@@ -26,6 +26,7 @@ class AppConfig:
     dist: str = "jammy"
     component: str = "main"
     arch: str = "amd64"
+    test_repo: Optional[str] = None
 
     def as_dict(self) -> Dict[str, str]:
         """Представление конфигурации в виде словаря ключ-значение."""
@@ -68,6 +69,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--arch", default="amd64", help="Архитектура пакетов"
+    )
+    parser.add_argument(
+        "--test-repo", default=None, 
+        help="Путь к файлу описания графа (режим тестирования)",
     )
     return parser
 
@@ -129,6 +134,20 @@ def parse_config(argv: Optional[List[str]] = None) -> AppConfig:
 
     mode = _validate_mode(args.mode)
     package = _validate_package(args.package)
+
+    # В тестовом режиме repo/version не используются — не валидируем
+    if args.test_repo:
+        return AppConfig(
+            package=package,
+            repo=args.repo,
+            mode=mode,
+            version=args.version,
+            dist=args.dist,
+            component=args.component,
+            arch=args.arch,
+            test_repo=args.test_repo,
+        )
+
     repo = _validate_repo(args.repo, mode)
     version = _validate_version(args.version)
 
@@ -140,4 +159,5 @@ def parse_config(argv: Optional[List[str]] = None) -> AppConfig:
         dist=args.dist,
         component=args.component,
         arch=args.arch,
+        test_repo=args.test_repo,
     )

@@ -1,0 +1,35 @@
+Этап 3. Граф зависимостей (DFS без рекурсии) и режим тестирования
+==================================================================
+
+=== Случай 1: простой граф без циклов ===
+> python -m src.pkgviz --package A --repo dummy --mode local --version 1.0 --test-repo tests/fixtures/test_graph_simple.txt
+Граф зависимостей от A:
+  A -> B, C
+  B -> D
+  C -> D
+  D -> (нет)
+Циклов не обнаружено.
+> echo %errorlevel%
+0
+
+=== Случай 2: цикл A -> B -> C -> A ===
+> python -m src.pkgviz --package A --repo dummy --mode local --version 1.0 --test-repo tests/fixtures/test_graph_cycle.txt
+Граф зависимостей от A:
+  A -> B
+  B -> C
+  C -> A
+Обнаружены циклы:
+  A -> B -> C -> A
+> echo %errorlevel%
+0
+
+=== Случай 3: самоцикл A -> A ===
+> python -m src.pkgviz --package A --repo dummy --mode local --version 1.0 --test-repo tests/fixtures/test_graph_self.txt
+Граф зависимостей от A:
+  A -> A, B
+  B -> C
+  C -> (нет)
+Обнаружены циклы:
+  A -> A
+> echo %errorlevel%
+0
